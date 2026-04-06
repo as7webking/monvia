@@ -35,12 +35,8 @@ export default function LoginPage() {
         if (error) throw error
 
         if (data.user) {
-          await supabase
-            .from('profiles')
-            .upsert({ id: data.user.id, email, currency })
+          alert('Check your email for confirmation!')
         }
-
-        alert('Check your email for confirmation!')
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,

@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {
+    root: "/Users/ahmad_s7/Desktop/React Apps/monvia",
+  },
 };
 
 export default nextConfig;

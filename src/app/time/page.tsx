@@ -39,7 +39,7 @@ export default function TimePage() {
           .eq('user_id', user.id)
           .order('date', { ascending: false })
         if (error) throw error
-        setTimeEntries(data || [])
+        setTimeEntries(data?.map(item => ({ ...item, hours: parseFloat(item.hours as string) })) || [])
       }
     } catch (error) {
       console.error('Failed to load time entries:', error)
@@ -63,7 +63,10 @@ export default function TimePage() {
         if (editingEntry) {
           const { error } = await supabase
             .from('time_entries')
-            .update(validatedData)
+            .update({
+              ...validatedData,
+              hours: validatedData.hours.toString(),
+            })
             .eq('id', editingEntry.id)
           if (error) throw error
           setEditingEntry(null)
@@ -72,6 +75,7 @@ export default function TimePage() {
             .from('time_entries')
             .insert({
               ...validatedData,
+              hours: validatedData.hours.toString(),
               user_id: user.id,
             })
           if (error) throw error
@@ -109,7 +113,7 @@ export default function TimePage() {
         const { error } = await supabase
           .from('time_entries')
           .delete()
-          .eq('id', id)
+          .eq('id', Number(id))
         if (error) throw error
         loadTimeEntries()
       } catch (error: unknown) {

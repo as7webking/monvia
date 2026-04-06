@@ -41,26 +41,26 @@ export default function IncomePage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        const userCurrencyFromMetadata = (user.user_metadata as { currency?: string })?.currency
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('currency')
+          .select('id,email,full_name')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
+
         if (profileError) {
-          await supabase
-            .from('profiles')
-            .insert({ id: user.id, email: user.email, currency: 'USD' })
-          setUserCurrency('USD')
-        } else {
-          setUserCurrency(profileData?.currency ?? 'USD')
+          console.warn('Profile query failed, falling back to metadata or USD:', profileError)
         }
+
+        setUserCurrency(userCurrencyFromMetadata ?? 'USD')
+
         const { data, error } = await supabase
           .from('incomes')
           .select('*')
           .eq('user_id', user.id)
           .order('date', { ascending: false })
         if (error) throw error
-        setIncomes(data || [])
+        setIncomes(data?.map(item => ({ ...item, amount: parseFloat(item.amount as string) })) || [])
       }
     } catch (error) {
       console.error('Failed to load incomes:', error)
@@ -89,10 +89,10 @@ export default function IncomePage() {
           const { error } = await supabase
             .from('incomes')
             .update({
-              ...validatedData,
+              description: validatedData.description,
+              date: validatedData.date,
               category,
               amount: convertedAmount,
-              currency: userCurrency,
             })
             .eq('id', editingEntry.id)
           if (error) throw error
@@ -101,10 +101,10 @@ export default function IncomePage() {
           const { error } = await supabase
             .from('incomes')
             .insert({
-              ...validatedData,
+              description: validatedData.description,
+              date: validatedData.date,
               category,
               amount: convertedAmount,
-              currency: userCurrency,
               user_id: user.id,
             })
           if (error) throw error
@@ -151,7 +151,7 @@ export default function IncomePage() {
       const { error } = await supabase
         .from('incomes')
         .delete()
-        .eq('id', id)
+        .eq('id', Number(id))
       if (error) throw error
       loadIncomes()
       setSuccessMessage('Income deleted')
