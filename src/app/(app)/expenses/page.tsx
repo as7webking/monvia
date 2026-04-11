@@ -78,11 +78,41 @@ export default function ExpensesPage() {
     setSuccessMessage('')
     setErrorMessage('')
     try {
+      // Validate required fields
+      if (!formData.amount || formData.amount <= 0) {
+        setErrorMessage('Amount must be greater than 0')
+        return
+      }
+      if (!formData.description || formData.description.trim() === '') {
+        setErrorMessage('Description is required')
+        return
+      }
+      if (!formData.category || formData.category === '') {
+        setErrorMessage('Category is required')
+        return
+      }
+      if (!formData.date) {
+        setErrorMessage('Date is required')
+        return
+      }
+      if (!formData.currency || formData.currency === '') {
+        setErrorMessage('Currency is required')
+        return
+      }
+
       const validatedData = expenseSchema.parse(formData)
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const category = formData.category === 'Other' ? customCategory || 'Other' : formData.category
-        const convertedAmount = convertToCurrency(validatedData.amount, validatedData.currency, userCurrency)
+
+        const expenseData = {
+          description: validatedData.description,
+          date: validatedData.date,
+          category,
+          amount: Number(validatedData.amount.toFixed(2)),
+          currency: validatedData.currency,
+          user_id: user.id,
+        }
 
         if (editingEntry) {
           const { error } = await supabase
@@ -91,22 +121,26 @@ export default function ExpensesPage() {
               description: validatedData.description,
               date: validatedData.date,
               category,
-              amount: convertedAmount,
+              amount: Number(validatedData.amount.toFixed(2)),
+              currency: validatedData.currency,
             })
             .eq('id', editingEntry.id)
-          if (error) throw error
+          if (error) {
+            console.error('Update error:', error)
+            throw error
+          }
           setSuccessMessage('Expense updated successfully!')
         } else {
-          const { error } = await supabase
+          console.log('Inserting expense:', expenseData)
+          const { error, data } = await supabase
             .from('expenses')
-            .insert({
-              description: validatedData.description,
-              date: validatedData.date,
-              category,
-              amount: convertedAmount,
-              user_id: user.id,
-            })
-          if (error) throw error
+            .insert([expenseData])
+          if (error) {
+            console.error('Insert error:', error)
+            console.error('Failed data:', expenseData)
+            throw error
+          }
+          console.log('Insert success:', data)
           setSuccessMessage('Expense added successfully!')
         }
         setFormData({
@@ -123,6 +157,7 @@ export default function ExpensesPage() {
         setTimeout(() => setSuccessMessage(''), 3000)
       }
     } catch (error: unknown) {
+      console.error('Form submission error:', error)
       if (error instanceof Error) {
         setErrorMessage(error.message)
       } else {
@@ -144,13 +179,13 @@ export default function ExpensesPage() {
     setShowForm(true)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string | number) => {
     if (!confirm('Delete this expense entry?')) return
     try {
       const { error } = await supabase
         .from('expenses')
         .delete()
-        .eq('id', Number(id))
+        .eq('id', id)
       if (error) throw error
       loadExpenses()
       setSuccessMessage('Expense deleted')
@@ -323,7 +358,14 @@ export default function ExpensesPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-lg font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: expense.currency || userCurrency }).format(Number(expense.amount))}</p>
+                    <p className="text-lg font-bold">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: userCurrency }).format(
+                        convertToCurrency(Number(expense.amount), expense.currency ?? userCurrency, userCurrency)
+                      )}
+                    </p>
+                    {expense.currency && expense.currency !== userCurrency && (
+                      <p className="text-sm text-muted-foreground">({new Intl.NumberFormat('en-US', { style: 'currency', currency: expense.currency }).format(Number(expense.amount))})</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button

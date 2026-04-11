@@ -74,6 +74,10 @@ CREATE POLICY "Users can insert own time entries" ON time_entries FOR INSERT WIT
 CREATE POLICY "Users can update own time entries" ON time_entries FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own time entries" ON time_entries FOR DELETE USING (auth.uid() = user_id);
 
+-- Migration: Add currency columns if they don't exist (for backward compatibility)
+ALTER TABLE incomes ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'USD';
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'USD';
+
 -- Function to handle new user
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

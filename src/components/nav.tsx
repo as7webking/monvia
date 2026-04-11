@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, User } from 'lucide-react'
 
 export function Nav() {
   const [isOpen, setIsOpen] = useState(false)
@@ -50,10 +50,16 @@ export function Nav() {
           
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/dashboard" className="hover:underline">Dashboard</Link>
-            <Link href="/income" className="hover:underline">Income</Link>
-            <Link href="/expenses" className="hover:underline">Expenses</Link>
-            <Link href="/time" className="hover:underline">Time</Link>
+            <Link href="/dashboard" className="hover:underline text-sm">Dashboard</Link>
+            <Link href="/income" className="hover:underline text-sm">Income</Link>
+            <Link href="/expenses" className="hover:underline text-sm">Expenses</Link>
+            <Link href="/time" className="hover:underline text-sm">Time</Link>
+            {isAuthenticated && (
+              <Link href="/profile" className="hover:underline text-sm flex items-center gap-1">
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
+            )}
             {isAuthenticated ? (
               <Button onClick={handleLogout} variant="outline" size="sm">Logout</Button>
             ) : (
@@ -81,6 +87,12 @@ export function Nav() {
               <Link href="/income" className="hover:underline" onClick={() => setIsOpen(false)}>Income</Link>
               <Link href="/expenses" className="hover:underline" onClick={() => setIsOpen(false)}>Expenses</Link>
               <Link href="/time" className="hover:underline" onClick={() => setIsOpen(false)}>Time</Link>
+              {isAuthenticated && (
+                <Link href="/profile" className="hover:underline flex items-center gap-1" onClick={() => setIsOpen(false)}>
+                  <User className="h-4 w-4" />
+                  Profile
+                </Link>
+              )}
               {isAuthenticated ? (
                 <Button onClick={handleLogout} variant="outline" size="sm" className="w-full">
                   Logout

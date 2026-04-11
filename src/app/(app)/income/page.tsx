@@ -52,7 +52,9 @@ export default function IncomePage() {
           console.warn('Profile query failed, falling back to metadata or USD:', profileError)
         }
 
-        setUserCurrency(userCurrencyFromMetadata ?? 'USD')
+        const currentUserCurrency = userCurrencyFromMetadata ?? 'USD'
+        setUserCurrency(currentUserCurrency)
+        setFormData((prev) => ({ ...prev, currency: currentUserCurrency }))
 
         const { data, error } = await supabase
           .from('incomes')
@@ -79,11 +81,41 @@ export default function IncomePage() {
     setSuccessMessage('')
     setErrorMessage('')
     try {
+      // Validate required fields
+      if (!formData.amount || formData.amount <= 0) {
+        setErrorMessage('Amount must be greater than 0')
+        return
+      }
+      if (!formData.description || formData.description.trim() === '') {
+        setErrorMessage('Description is required')
+        return
+      }
+      if (!formData.category || formData.category === '') {
+        setErrorMessage('Category is required')
+        return
+      }
+      if (!formData.date) {
+        setErrorMessage('Date is required')
+        return
+      }
+      if (!formData.currency || formData.currency === '') {
+        setErrorMessage('Currency is required')
+        return
+      }
+
       const validatedData = incomeSchema.parse(formData)
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const category = formData.category === 'Other' ? customCategory || 'Other' : formData.category
-        const convertedAmount = convertToCurrency(validatedData.amount, validatedData.currency, userCurrency)
+
+        const incomeData = {
+          description: validatedData.description,
+          date: validatedData.date,
+          category,
+          amount: Number(validatedData.amount.toFixed(2)),
+          currency: validatedData.currency,
+          user_id: user.id,
+        }
 
         if (editingEntry) {
           const { error } = await supabase
@@ -92,22 +124,26 @@ export default function IncomePage() {
               description: validatedData.description,
               date: validatedData.date,
               category,
-              amount: convertedAmount,
+              amount: Number(validatedData.amount.toFixed(2)),
+              currency: validatedData.currency,
             })
             .eq('id', editingEntry.id)
-          if (error) throw error
+          if (error) {
+            console.error('Update error:', error)
+            throw error
+          }
           setSuccessMessage('Income updated successfully!')
         } else {
-          const { error } = await supabase
+          console.log('Inserting income:', incomeData)
+          const { error, data } = await supabase
             .from('incomes')
-            .insert({
-              description: validatedData.description,
-              date: validatedData.date,
-              category,
-              amount: convertedAmount,
-              user_id: user.id,
-            })
-          if (error) throw error
+            .insert([incomeData])
+          if (error) {
+            console.error('Insert error:', error)
+            console.error('Failed data:', incomeData)
+            throw error
+          }
+          console.log('Insert success:', data)
           setSuccessMessage('Income added successfully!')
         }
         setFormData({
@@ -124,6 +160,7 @@ export default function IncomePage() {
         setTimeout(() => setSuccessMessage(''), 3000)
       }
     } catch (error: unknown) {
+      console.error('Form submission error:', error)
       if (error instanceof Error) {
         setErrorMessage(error.message)
       } else {
@@ -145,13 +182,13 @@ export default function IncomePage() {
     setShowForm(true)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string | number) => {
     if (!confirm('Delete this income entry?')) return
     try {
       const { error } = await supabase
         .from('incomes')
         .delete()
-        .eq('id', Number(id))
+        .eq('id', id)
       if (error) throw error
       loadIncomes()
       setSuccessMessage('Income deleted')
@@ -324,7 +361,14 @@ export default function IncomePage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-lg font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: income.currency || userCurrency }).format(Number(income.amount))}</p>
+                    <p className="text-lg font-bold">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: userCurrency }).format(
+                        convertToCurrency(Number(income.amount), income.currency ?? userCurrency, userCurrency)
+                      )}
+                    </p>
+                    {income.currency && income.currency !== userCurrency && (
+                      <p className="text-sm text-muted-foreground">({new Intl.NumberFormat('en-US', { style: 'currency', currency: income.currency }).format(Number(income.amount))})</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button

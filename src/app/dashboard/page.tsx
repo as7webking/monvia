@@ -1,5 +1,6 @@
 import { PageContainer, PageHeader } from "@/components"
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { convertToCurrency } from '@/lib/currency'
 import { IncomeRepository, ExpenseRepository, TimeEntryRepository } from '@/lib/repositories'
 
 export default async function DashboardPage() {
@@ -23,8 +24,8 @@ export default async function DashboardPage() {
     TimeEntryRepository.getAll(user.id),
   ])
 
-  const totalIncome = incomes.reduce((sum, inc) => sum + Number(inc.amount), 0)
-  const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
+  const totalIncome = incomes.reduce((sum, inc) => sum + convertToCurrency(Number(inc.amount), inc.currency ?? userCurrency, userCurrency), 0)
+  const totalExpenses = expenses.reduce((sum, exp) => sum + convertToCurrency(Number(exp.amount), exp.currency ?? userCurrency, userCurrency), 0)
   const netIncome = totalIncome - totalExpenses
   const totalHours = timeEntries.reduce((sum, entry) => sum + Number(entry.hours), 0)
 
@@ -64,7 +65,7 @@ export default async function DashboardPage() {
           {incomes.slice(0, 3).map((income) => (
             <div key={income.id} className="flex justify-between py-2 border-b">
               <span>{income.description}</span>
-              <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: income.currency || userCurrency }).format(Number(income.amount))}</span>
+              <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: userCurrency }).format(convertToCurrency(Number(income.amount), income.currency ?? userCurrency, userCurrency))}</span>
             </div>
           ))}
           {incomes.length === 0 && <p className="text-muted-foreground">No incomes yet</p>}
@@ -74,7 +75,7 @@ export default async function DashboardPage() {
           {expenses.slice(0, 3).map((expense) => (
             <div key={expense.id} className="flex justify-between py-2 border-b">
               <span>{expense.description}</span>
-              <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: expense.currency || userCurrency }).format(Number(expense.amount))}</span>
+              <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: userCurrency }).format(convertToCurrency(Number(expense.amount), expense.currency ?? userCurrency, userCurrency))}</span>
             </div>
           ))}
           {expenses.length === 0 && <p className="text-muted-foreground">No expenses yet</p>}

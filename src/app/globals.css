@@ -77,3 +77,54 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
 }
+
+/* PWA & Mobile app-like styling */
+html {
+  /* Prevent zooming on input focus on iOS */
+  font-size: 16px;
+}
+
+body {
+  /* Support safe areas on notched devices */
+  padding-left: safe-area-inset-left;
+  padding-right: safe-area-inset-right;
+  padding-bottom: safe-area-inset-bottom;
+  
+  /* Disable pull-to-refresh on iOS */
+  overscroll-behavior: none;
+  
+  /* Better text rendering on mobile */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Prevent selection bugs on mobile */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Allow text selection where needed */
+button, input, textarea, [contenteditable] {
+  user-select: auto;
+  -webkit-user-select: auto;
+}
+
+/* Touch-friendly interactions */
+button, a, [role="button"] {
+  /* Minimum 44x44 touch target */
+  min-height: 2.75rem;
+  
+  /* Tap highlight on iOS */
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Prevent horizontal scroll on mobile */
+main {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Better scrolling performance */
+html {
+  scroll-behavior: smooth;
+}

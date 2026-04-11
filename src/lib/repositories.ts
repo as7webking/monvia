@@ -6,6 +6,7 @@ export interface Income {
   description: string
   category: string
   date: string
+  currency: string
 }
 
 export interface Expense {
@@ -14,6 +15,7 @@ export interface Expense {
   description: string
   category: string
   date: string
+  currency: string
 }
 
 export interface TimeEntry {
