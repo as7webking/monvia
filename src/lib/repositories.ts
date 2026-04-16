@@ -1,3 +1,4 @@
+import 'server-only'
 import { createServerSupabaseClient } from './supabase-server'
 
 export interface Income {
@@ -7,6 +8,7 @@ export interface Income {
   category: string
   date: string
   currency: string
+  company_id: string
 }
 
 export interface Expense {
@@ -16,6 +18,7 @@ export interface Expense {
   category: string
   date: string
   currency: string
+  company_id: string
 }
 
 export interface TimeEntry {
@@ -23,25 +26,36 @@ export interface TimeEntry {
   description: string
   hours: number
   date: string
+  company_id: string
+}
+
+export interface Company {
+  id: string
+  owner_id: string
+  name: string
+  type: 'personal' | 'business'
+  currency: string | null
+  created_at: string
+  updated_at: string
 }
 
 export class IncomeRepository {
-  static async getAll(userId: string) {
+  static async getAll(companyId: string) {
     const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('incomes')
       .select('*')
-      .eq('user_id', userId)
+      .eq('company_id', companyId)
       .order('date', { ascending: false })
     if (error) throw error
     return data
   }
 
-  static async create(userId: string, income: Omit<Income, 'id'>) {
+  static async create(companyId: string, income: Omit<Income, 'id' | 'company_id'>) {
     const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('incomes')
-      .insert({ ...income, user_id: userId })
+      .insert({ ...income, company_id: companyId })
       .select()
       .single()
     if (error) throw error
@@ -71,22 +85,22 @@ export class IncomeRepository {
 }
 
 export class ExpenseRepository {
-  static async getAll(userId: string) {
+  static async getAll(companyId: string) {
     const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('expenses')
       .select('*')
-      .eq('user_id', userId)
+      .eq('company_id', companyId)
       .order('date', { ascending: false })
     if (error) throw error
     return data
   }
 
-  static async create(userId: string, expense: Omit<Expense, 'id'>) {
+  static async create(companyId: string, expense: Omit<Expense, 'id' | 'company_id'>) {
     const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('expenses')
-      .insert({ ...expense, user_id: userId })
+      .insert({ ...expense, company_id: companyId })
       .select()
       .single()
     if (error) throw error
@@ -116,22 +130,22 @@ export class ExpenseRepository {
 }
 
 export class TimeEntryRepository {
-  static async getAll(userId: string) {
+  static async getAll(companyId: string) {
     const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('time_entries')
       .select('*')
-      .eq('user_id', userId)
+      .eq('company_id', companyId)
       .order('date', { ascending: false })
     if (error) throw error
     return data
   }
 
-  static async create(userId: string, entry: Omit<TimeEntry, 'id'>) {
+  static async create(companyId: string, entry: Omit<TimeEntry, 'id' | 'company_id'>) {
     const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('time_entries')
-      .insert({ ...entry, user_id: userId })
+      .insert({ ...entry, company_id: companyId })
       .select()
       .single()
     if (error) throw error
@@ -157,5 +171,18 @@ export class TimeEntryRepository {
       .delete()
       .eq('id', id)
     if (error) throw error
+  }
+}
+
+export class CompanyRepository {
+  static async getAll(ownerId: string) {
+    const supabase = await createServerSupabaseClient()
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('owner_id', ownerId)
+      .order('created_at', { ascending: true })
+    if (error) throw error
+    return data
   }
 }

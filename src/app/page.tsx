@@ -65,15 +65,15 @@ export default async function Home() {
                 <CardContent className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-3xl bg-slate-100 p-5">
                     <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Income</p>
-                    <p className="mt-3 text-2xl font-semibold">$12,450</p>
+                    <p className="mt-3 text-2xl font-semibold">12,450 €</p>
                   </div>
                   <div className="rounded-3xl bg-slate-100 p-5">
                     <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Expenses</p>
-                    <p className="mt-3 text-2xl font-semibold">$8,320</p>
+                    <p className="mt-3 text-2xl font-semibold">8,320 €</p>
                   </div>
                   <div className="rounded-3xl bg-slate-100 p-5 sm:col-span-2">
                     <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Net</p>
-                    <p className="mt-3 text-3xl font-semibold text-slate-900">$4,130</p>
+                    <p className="mt-3 text-3xl font-semibold text-slate-900">4,130 €</p>
                   </div>
                 </CardContent>
               </Card>
@@ -193,28 +193,28 @@ export default async function Home() {
             </div>
 
             {/* Pricing Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               {/* Free Plan */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg transition-shadow flex flex-col">
-                <div className="mb-6">
+              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-lg">
+                <div className="min-h-[4.5rem]">
                   <h3 className="text-lg font-semibold text-slate-900">Free</h3>
-                  <p className="text-sm text-slate-600 mt-1">Get started for free</p>
+                  <p className="mt-1 text-sm text-slate-600">Get started for free</p>
                 </div>
                 
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">€0</span>
+                <div className="mb-8 min-h-[5.5rem]">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl font-bold text-slate-900">0 €</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-2">Forever free</p>
+                  <p className="mt-2 text-sm text-slate-600">Forever free</p>
                 </div>
 
-                <Link href="/onboarding" className="w-full inline-block mb-8">
-                  <button className="w-full py-3 px-4 rounded-lg border border-slate-300 text-slate-900 font-medium hover:bg-slate-50 transition-colors">
+                <Link href="/onboarding" className="mb-8 inline-block w-full">
+                  <button className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50">
                     Get started
                   </button>
                 </Link>
 
-                <ul className="space-y-4 text-sm text-slate-600 flex-1">
+                <ul className="flex flex-1 flex-col gap-4 text-sm text-slate-600">
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
                     <span>Income tracking</span>
@@ -235,27 +235,27 @@ export default async function Home() {
               </div>
 
               {/* Starter Plan */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg transition-shadow flex flex-col">
-                <div className="mb-6">
+              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-lg">
+                <div className="min-h-[4.5rem]">
                   <h3 className="text-lg font-semibold text-slate-900">Starter</h3>
-                  <p className="text-sm text-slate-600 mt-1">Better summaries</p>
+                  <p className="mt-1 text-sm text-slate-600">Better summaries</p>
                 </div>
                 
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">€7</span>
+                <div className="mb-8 min-h-[5.5rem]">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl font-bold text-slate-900">7 €</span>
                     <span className="text-slate-600">/month</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-2">Billed monthly</p>
+                  <p className="mt-2 text-sm text-slate-600">Billed monthly</p>
                 </div>
 
-                <Link href="/onboarding" className="w-full inline-block mb-8">
-                  <button className="w-full py-3 px-4 rounded-lg border border-slate-300 text-slate-900 font-medium hover:bg-slate-50 transition-colors">
+                <Link href="/onboarding" className="mb-8 inline-block w-full">
+                  <button className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50">
                     Start free
                   </button>
                 </Link>
 
-                <ul className="space-y-4 text-sm text-slate-600 flex-1">
+                <ul className="flex flex-1 flex-col gap-4 text-sm text-slate-600">
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
                     <span>Everything in Free</span>
@@ -276,33 +276,33 @@ export default async function Home() {
               </div>
 
               {/* Pro Plan - Highlighted */}
-              <div className="lg:col-span-1 md:col-span-2 lg:col-span-1 rounded-2xl border-2 border-blue-500 bg-gradient-to-br from-blue-50 to-white p-8 shadow-lg hover:shadow-xl transition-shadow flex flex-col relative ring-1 ring-blue-100">
+              <div className="relative flex h-full flex-col rounded-2xl border-2 border-blue-500 bg-gradient-to-br from-blue-50 to-white p-8 shadow-lg ring-1 ring-blue-100 transition-shadow hover:shadow-xl">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
                     Most Popular
                   </span>
                 </div>
 
-                <div className="mb-6">
+                <div className="min-h-[4.5rem]">
                   <h3 className="text-lg font-semibold text-slate-900">Pro</h3>
-                  <p className="text-sm text-blue-600 font-medium mt-1">Recommended</p>
+                  <p className="mt-1 text-sm font-medium text-blue-700">Recommended</p>
                 </div>
                 
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">€19</span>
+                <div className="mb-8 min-h-[5.5rem]">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl font-bold text-slate-900">19 €</span>
                     <span className="text-slate-600">/month</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-2">Billed monthly</p>
+                  <p className="mt-2 text-sm text-slate-600">Billed monthly</p>
                 </div>
 
-                <Link href="/onboarding" className="w-full inline-block mb-8">
-                  <button className="w-full py-3 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+                <Link href="/onboarding" className="mb-8 inline-block w-full">
+                  <button className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700">
                     Start free trial
                   </button>
                 </Link>
 
-                <ul className="space-y-4 text-sm text-slate-600 flex-1">
+                <ul className="flex flex-1 flex-col gap-4 text-sm text-slate-700">
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                     <span>Everything in Starter</span>
@@ -323,27 +323,27 @@ export default async function Home() {
               </div>
 
               {/* Business Plan */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg transition-shadow flex flex-col">
-                <div className="mb-6">
+              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-lg">
+                <div className="min-h-[4.5rem]">
                   <h3 className="text-lg font-semibold text-slate-900">Business</h3>
-                  <p className="text-sm text-slate-600 mt-1">For growing teams</p>
+                  <p className="mt-1 text-sm text-slate-600">For growing teams</p>
                 </div>
                 
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">€29</span>
+                <div className="mb-8 min-h-[5.5rem]">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl font-bold text-slate-900">29 €</span>
                     <span className="text-slate-600">/month</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-2">Billed monthly</p>
+                  <p className="mt-2 text-sm text-slate-600">Billed monthly</p>
                 </div>
 
-                <Link href="/onboarding" className="w-full inline-block mb-8">
-                  <button className="w-full py-3 px-4 rounded-lg border border-slate-300 text-slate-900 font-medium hover:bg-slate-50 transition-colors">
+                <Link href="/onboarding" className="mb-8 inline-block w-full">
+                  <button className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50">
                     Start free
                   </button>
                 </Link>
 
-                <ul className="space-y-4 text-sm text-slate-600 flex-1">
+                <ul className="flex flex-1 flex-col gap-4 text-sm text-slate-600">
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
                     <span>Everything in Pro</span>

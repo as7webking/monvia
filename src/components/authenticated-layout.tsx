@@ -1,4 +1,5 @@
 import { ReactNode } from "react"
+import { CompanyProvider } from "@/contexts/company-context"
 import { Nav } from "./nav"
 
 interface AuthenticatedLayoutProps {
@@ -7,9 +8,11 @@ interface AuthenticatedLayoutProps {
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
-      <Nav />
-      <main className="flex-1">{children}</main>
-    </div>
+    <CompanyProvider>
+      <div className="min-h-screen bg-background">
+        <Nav />
+        <main className="flex-1">{children}</main>
+      </div>
+    </CompanyProvider>
   )
 }

@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
+import { useCompany } from '@/contexts/company-context'
 import { profileUpdateSchema, formatValidationError } from '@/lib/validations'
+import { getAccountAccess } from '@/lib/account-access'
+import { currencyOptions, normalizeCurrencyCode } from '@/lib/currency'
 import { PageContainer, PageHeader } from '@/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { User, Mail, DollarSign, LogOut } from 'lucide-react'
+import { User, Mail, DollarSign, LogOut, BriefcaseBusiness } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -23,9 +26,13 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [fullName, setFullName] = useState('')
   const [currency, setCurrency] = useState('USD')
+  const [workspaceName, setWorkspaceName] = useState('')
+  const [workspaceCurrency, setWorkspaceCurrency] = useState('USD')
   const [message, setMessage] = useState('')
   const router = useRouter()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
+  const { currentCompany, refreshCompanies } = useCompany()
+  const accountAccess = getAccountAccess(profile?.email)
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -46,8 +53,8 @@ export default function ProfilePage() {
 
         setProfile(data)
         setFullName(data.full_name)
-        setCurrency(data.currency)
-      } catch (error) {
+        setCurrency(normalizeCurrencyCode(data.currency))
+      } catch {
         setMessage('Error loading profile')
       } finally {
         setLoading(false)
@@ -56,6 +63,13 @@ export default function ProfilePage() {
 
     loadProfile()
   }, [supabase, router])
+
+  useEffect(() => {
+    if (currentCompany) {
+      setWorkspaceName(currentCompany.name)
+      setWorkspaceCurrency(normalizeCurrencyCode(currentCompany.currency ?? 'USD'))
+    }
+  }, [currentCompany])
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,8 +124,36 @@ export default function ProfilePage() {
     try {
       await supabase.auth.signOut()
       router.push('/login')
-    } catch (error) {
+    } catch {
       setMessage('Error logging out')
+    }
+  }
+
+  const handleSaveWorkspace = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!currentCompany) {
+      setMessage('No workspace selected')
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('companies')
+        .update({
+          name: workspaceName.trim() || currentCompany.name,
+          currency: workspaceCurrency,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', currentCompany.id)
+
+      if (error) throw error
+
+      await refreshCompanies(currentCompany.id)
+      setMessage('Workspace updated successfully!')
+      setTimeout(() => setMessage(''), 3000)
+    } catch (error) {
+      setMessage(error instanceof Error ? `Error: ${error.message}` : 'Error updating workspace')
     }
   }
 
@@ -152,9 +194,9 @@ export default function ProfilePage() {
         description="Manage your account information"
       />
 
-      <div className="grid gap-6 max-w-2xl">
+      <div className="grid w-full gap-6 lg:grid-cols-2">
         {/* Profile Information Card */}
-        <Card>
+        <Card className="h-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -209,15 +251,14 @@ export default function ProfilePage() {
                 </label>
                 <select
                   value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
+                  onChange={(e) => setCurrency(normalizeCurrencyCode(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
                 >
-                  <option value="USD">USD - United States Dollar</option>
-                  <option value="EUR">EUR - Euro</option>
-                  <option value="GBP">GBP - British Pound</option>
-                  <option value="JPY">JPY - Japanese Yen</option>
-                  <option value="CAD">CAD - Canadian Dollar</option>
-                  <option value="AUD">AUD - Australian Dollar</option>
+                  {currencyOptions.map((option) => (
+                    <option key={option.code} value={option.code}>
+                      {option.code} - {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -234,8 +275,71 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BriefcaseBusiness className="h-5 w-5" />
+              Current Workspace
+            </CardTitle>
+            <CardDescription>Manage the active workspace, currency, and access settings.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {currentCompany ? (
+              <form onSubmit={handleSaveWorkspace} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Workspace Name</label>
+                  <input
+                    type="text"
+                    value={workspaceName}
+                    onChange={(e) => setWorkspaceName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Workspace name"
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Workspace Type</label>
+                    <input
+                      type="text"
+                      value={currentCompany.type}
+                      disabled
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed capitalize"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Workspace Currency</label>
+                    <select
+                      value={workspaceCurrency}
+                      onChange={(e) => setWorkspaceCurrency(normalizeCurrencyCode(e.target.value))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                    >
+                      {currencyOptions.map((option) => (
+                        <option key={option.code} value={option.code}>
+                          {option.code} - {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  Access level: {accountAccess.badgeLabel}
+                </div>
+
+                <Button type="submit" className="w-full">Save Workspace</Button>
+              </form>
+            ) : (
+              <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                Complete onboarding to create your first workspace.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Account Details */}
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Account Details</CardTitle>
           </CardHeader>
@@ -256,7 +360,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Logout */}
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-red-700">Sign Out</CardTitle>
             <CardDescription className="text-red-600">

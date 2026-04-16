@@ -35,32 +35,43 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes—require authentication
+  const pathname = request.nextUrl.pathname
   const protectedRoutes = ['/dashboard', '/income', '/expenses', '/time', '/onboarding', '/profile']
-  const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+  const workspaceRequiredRoutes = ['/dashboard', '/income', '/expenses', '/time']
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
-  // If not authenticated and trying to access protected route, redirect to login
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // If authenticated and on login page, redirect to dashboard
-  if (user && request.nextUrl.pathname === '/login') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
+  if (user) {
+    const { count, error } = await supabase
+      .from('companies')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', user.id)
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-  // creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object instead of the supabaseResponse object
-  //    before returning it.
+    if (error) {
+      console.error('Failed to check onboarding status:', error)
+      return supabaseResponse
+    }
+
+    const hasCompany = (count ?? 0) > 0
+
+    if (pathname === '/login') {
+      const url = request.nextUrl.clone()
+      url.pathname = hasCompany ? '/dashboard' : '/onboarding'
+      return NextResponse.redirect(url)
+    }
+
+    if (!hasCompany && workspaceRequiredRoutes.some((route) => pathname.startsWith(route))) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/onboarding'
+      return NextResponse.redirect(url)
+    }
+
+  }
 
   return supabaseResponse
 }

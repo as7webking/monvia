@@ -4,11 +4,22 @@ import { useEffect } from 'react'
 
 export function PwaInstaller() {
   useEffect(() => {
-    // Only run in browser
     if (typeof window === 'undefined') return
 
-    // Register service worker for PWA support
-    if ('serviceWorker' in navigator) {
+    const isDevelopment = process.env.NODE_ENV === 'development'
+
+    const unregisterExistingWorkers = async () => {
+      if (!('serviceWorker' in navigator)) return
+
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(registrations.map((registration) => registration.unregister()))
+    }
+
+    if (isDevelopment) {
+      unregisterExistingWorkers().catch((error) => {
+        console.log('Service Worker cleanup failed:', error)
+      })
+    } else if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
         .then((registration) => {
@@ -19,21 +30,21 @@ export function PwaInstaller() {
         })
     }
 
-    // Handle install promotion on compatible browsers
-    let deferredPrompt: any
-
-    window.addEventListener('beforeinstallprompt', (e) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
-      deferredPrompt = e
-      
-      // You can show an install button here if desired
-      // For now, this just allows the browser's built-in prompt
-    })
+    }
 
-    window.addEventListener('appinstalled', () => {
+    const handleAppInstalled = () => {
       console.log('PWA was installed')
-      deferredPrompt = null
-    })
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+    }
   }, [])
 
   return null

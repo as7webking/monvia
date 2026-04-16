@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   icons: [
     { rel: "icon", url: "/favicon.ico" },
-    { rel: "apple-touch-icon", url: "/icon-192.png" },
+    { rel: "apple-touch-icon", url: "/icon-192x192.png" },
   ],
 };
 
@@ -41,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased scroll-smooth">
+    <html lang="en" className="h-full antialiased scroll-smooth" data-scroll-behavior="smooth">
       <body suppressHydrationWarning className="min-h-full flex min-h-full flex-col font-sans">
         <PwaInstaller />
         {children}
