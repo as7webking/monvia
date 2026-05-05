@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { useCompany } from '@/contexts/company-context'
-import { getAccountAccess } from '@/lib/account-access'
+import { useAccountAccess } from '@/hooks/use-account-access'
 import { Button } from '@/components/ui/button'
 import { BriefcaseBusiness, Menu, X, User } from 'lucide-react'
 
@@ -16,7 +16,7 @@ export function Nav() {
   const [supabase] = useState(() => createClient())
   const router = useRouter()
   const { companies, currentCompanyId, loading, setCurrentCompanyId } = useCompany()
-  const accountAccess = getAccountAccess(accountEmail)
+  const { accountAccess } = useAccountAccess(accountEmail)
 
   useEffect(() => {
     let mounted = true

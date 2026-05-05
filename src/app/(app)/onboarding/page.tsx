@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase-client'
 import { useCompany } from '@/contexts/company-context'
 import { canCreateWorkspace, getAccountAccess } from '@/lib/account-access'
+import { useAccountAccess } from '@/hooks/use-account-access'
 import { currencyOptions, normalizeCurrencyCode } from '@/lib/currency'
 
 export default function OnboardingPage() {
@@ -21,7 +22,7 @@ export default function OnboardingPage() {
   const [message, setMessage] = useState('')
   const [accountEmail, setAccountEmail] = useState<string | null>(null)
 
-  const accountAccess = getAccountAccess(accountEmail)
+  const { accountAccess } = useAccountAccess(accountEmail)
 
   useEffect(() => {
     const loadAccountContext = async () => {
@@ -125,7 +126,7 @@ export default function OnboardingPage() {
   return (
     <PageContainer>
       <PageHeader title="Welcome" description="Create your first workspace to start tracking your business." />
-      <Card className="max-w-2xl">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Workspace setup</CardTitle>
         </CardHeader>

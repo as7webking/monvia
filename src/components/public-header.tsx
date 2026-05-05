@@ -29,15 +29,9 @@ export function PublicHeader({ user }: PublicHeaderProps) {
           <Link href="/terms" className="transition hover:text-slate-900">Terms</Link>
         </nav>
 
-        {user ? (
-          <Link href="/profile" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-            Profile
-          </Link>
-        ) : (
-          <Link href="/login" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-            Login
-          </Link>
-        )}
+        <Link href={user ? '/profile' : '/login'} className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+          Profile
+        </Link>
       </div>
     </header>
   )

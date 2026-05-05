@@ -1,53 +1,144 @@
+import { LegalPage } from '@/components/legal-page'
+
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="container mx-auto max-w-4xl px-4 py-20 sm:py-24">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
-          <p className="text-sm uppercase tracking-[0.4em] text-slate-500">Legal</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-            Privacy Policy
-          </h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600">
-            Monvia is designed to help freelancers and small teams manage financial data with clarity and care.
-            This page explains what information we collect, how we use it, and the choices available to you.
-          </p>
-
-          <div className="mt-12 space-y-10">
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">Information We Collect</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                We may collect account details, profile information, workspace data, and the records you create inside
-                the product, such as income, expenses, time entries, and related settings.
+    <LegalPage
+      title="Privacy Policy"
+      intro={
+        <p>
+          This page is designed as a Germany/EU-friendly privacy notice template for Monvia. Replace the placeholders
+          below with your real company details, processing activities, and legal review before going live.
+        </p>
+      }
+      sections={[
+        {
+          title: '1. Data Controller / Provider',
+          content: (
+            <>
+              <p>[Legal company or provider name]</p>
+              <p>[Street and house number]</p>
+              <p>[Postal code, city, country]</p>
+              <p>Email: [privacy@your-domain.com]</p>
+              <p>Phone: [contact phone number]</p>
+            </>
+          ),
+        },
+        {
+          title: '2. What Data We Collect',
+          content: (
+            <>
+              <p>
+                We may process account data, authentication data, profile details, workspace/company information, and
+                bookkeeping data entered into the app, such as income, expenses, time entries, currencies, and settings.
               </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">How We Use Information</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                Your information is used to operate the product, secure access, improve reliability, support account
-                features, and provide the bookkeeping experience described throughout the app.
+              <p>
+                We may also process technical data such as IP address, browser/device information, log data, and
+                security-related metadata required to operate the service.
               </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">Data Protection</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                We take reasonable technical and organizational measures to protect data in transit and at rest. No
-                online system can promise absolute security, but protecting financial information remains a core
-                priority.
+            </>
+          ),
+        },
+        {
+          title: '3. Purposes of Processing',
+          content: (
+            <>
+              <p>
+                Personal data may be processed to provide the service, manage user accounts, authenticate users,
+                maintain security, deliver support, operate infrastructure, and improve reliability.
               </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">Your Choices</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                You can review and update profile details from your account and contact support if you need help with
-                privacy-related questions or requests.
+              <p>
+                Add your actual processing purposes here, including onboarding, billing/account access, support, email
+                communication, analytics, and compliance needs where applicable.
               </p>
-            </section>
-          </div>
-        </div>
-      </main>
-    </div>
+            </>
+          ),
+        },
+        {
+          title: '4. Legal Basis',
+          content: (
+            <>
+              <p>
+                Placeholder: specify the lawful basis under GDPR/EEA rules for each processing activity, for example
+                contract performance, legal obligation, legitimate interests, or consent where required.
+              </p>
+              <p>
+                This section should be reviewed with your legal advisor and aligned with the actual data flows in the
+                product.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '5. Third-Party Processors / Services',
+          content: (
+            <>
+              <p>
+                List the third-party processors and service providers used to run the SaaS, for example hosting,
+                authentication, database, storage, email delivery, analytics, monitoring, or payment providers.
+              </p>
+              <p>
+                For each provider, add the provider name, purpose, region/country, and a link to the provider privacy
+                information if relevant.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '6. Storage and Retention',
+          content: (
+            <>
+              <p>
+                Explain how long account, financial, support, log, and backup data is kept, and what criteria determine
+                retention periods.
+              </p>
+              <p>
+                Add any mandatory statutory retention requirements that apply to your business and region.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '7. User Rights',
+          content: (
+            <>
+              <p>
+                Users may have rights to access, rectify, erase, restrict processing, object to processing, and request
+                data portability, subject to applicable law.
+              </p>
+              <p>
+                Add the process for submitting a request and, if applicable, the right to lodge a complaint with a
+                supervisory authority.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '8. Contact Details',
+          content: (
+            <>
+              <p>Privacy contact: [privacy@your-domain.com]</p>
+              <p>Support contact: [support@your-domain.com]</p>
+              <p>
+                If you appoint a data protection officer, add the DPO contact details here: [DPO name and contact].
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '9. Cookies / Analytics',
+          content: (
+            <>
+              <p>
+                Add a clear description of cookies, analytics, tracking, consent requirements, and any consent banner or
+                preference center used on the public site.
+              </p>
+              <p>
+                If no analytics or non-essential cookies are used, state that explicitly here.
+              </p>
+            </>
+          ),
+        },
+      ]}
+    />
   )
 }

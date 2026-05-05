@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import { useCompany } from '@/contexts/company-context'
 import { profileUpdateSchema, formatValidationError } from '@/lib/validations'
-import { getAccountAccess } from '@/lib/account-access'
+import { useAccountAccess } from '@/hooks/use-account-access'
 import { currencyOptions, normalizeCurrencyCode } from '@/lib/currency'
 import { PageContainer, PageHeader } from '@/components'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,19 @@ interface UserProfile {
   created_at: string
 }
 
+interface ManagedProfile {
+  id: string
+  email: string
+  full_name: string
+  created_at: string
+  workspaceCount: number
+  workspaceNames: string[]
+  isAdmin: boolean
+  isPro: boolean
+  plan: 'free' | 'pro'
+  subscriptionEndsAt: string | null
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,10 +42,13 @@ export default function ProfilePage() {
   const [workspaceName, setWorkspaceName] = useState('')
   const [workspaceCurrency, setWorkspaceCurrency] = useState('USD')
   const [message, setMessage] = useState('')
+  const [managedProfiles, setManagedProfiles] = useState<ManagedProfile[]>([])
+  const [adminLoading, setAdminLoading] = useState(false)
+  const [monthsByProfile, setMonthsByProfile] = useState<Record<string, number>>({})
   const router = useRouter()
   const [supabase] = useState(() => createClient())
   const { currentCompany, refreshCompanies } = useCompany()
-  const accountAccess = getAccountAccess(profile?.email)
+  const { accountAccess } = useAccountAccess(profile?.email)
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -70,6 +86,41 @@ export default function ProfilePage() {
       setWorkspaceCurrency(normalizeCurrencyCode(currentCompany.currency ?? 'USD'))
     }
   }, [currentCompany])
+
+  useEffect(() => {
+    if (!accountAccess.isAdmin) return
+
+    let active = true
+
+    const loadManagedProfiles = async () => {
+      setAdminLoading(true)
+
+      try {
+        const response = await fetch('/api/admin/access', { cache: 'no-store' })
+        const data = await response.json()
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load managed profiles')
+        }
+        if (active) {
+          setManagedProfiles(data.profiles ?? [])
+        }
+      } catch (error) {
+        if (active) {
+          setMessage(error instanceof Error ? error.message : 'Failed to load admin controls')
+        }
+      } finally {
+        if (active) {
+          setAdminLoading(false)
+        }
+      }
+    }
+
+    void loadManagedProfiles()
+
+    return () => {
+      active = false
+    }
+  }, [accountAccess.isAdmin])
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -154,6 +205,50 @@ export default function ProfilePage() {
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       setMessage(error instanceof Error ? `Error: ${error.message}` : 'Error updating workspace')
+    }
+  }
+
+  const handleAccessUpdate = async (targetUserId: string, makeAdmin: boolean, makePro: boolean) => {
+    setAdminLoading(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/admin/access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetUserId,
+          makeAdmin,
+          makePro,
+          monthsPaid: monthsByProfile[targetUserId] ?? 1,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update access')
+      }
+
+      setManagedProfiles(data.profiles ?? [])
+      setMessage('Access updated successfully!')
+      setTimeout(() => setMessage(''), 3000)
+    } catch (error) {
+      setMessage(error instanceof Error ? `Error: ${error.message}` : 'Error updating access')
+    } finally {
+      setAdminLoading(false)
+    }
+  }
+
+  const handleCopy = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setMessage(`${label} copied.`)
+      setTimeout(() => setMessage(''), 2000)
+    } catch {
+      setMessage(`Error: failed to copy ${label.toLowerCase()}`)
     }
   }
 
@@ -358,6 +453,109 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+
+        {accountAccess.isAdmin && (
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Admin Access Management</CardTitle>
+              <CardDescription>Grant or revoke Pro access and admin rights for other profiles.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {adminLoading && managedProfiles.length === 0 ? (
+                <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  Loading profiles...
+                </div>
+              ) : managedProfiles.length === 0 ? (
+                <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  No profiles found.
+                </div>
+              ) : (
+                managedProfiles.map((managedProfile) => {
+                  const isCurrentUser = managedProfile.id === profile.id
+
+                  return (
+                    <div key={managedProfile.id} className="rounded-lg border border-slate-200 p-4">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="space-y-1">
+                          <p className="font-medium text-slate-900">
+                            {managedProfile.full_name || managedProfile.email}
+                          </p>
+                          <p className="text-sm text-slate-500">{managedProfile.email}</p>
+                          <p className="text-sm text-slate-500">
+                            Subscription: {managedProfile.plan.toUpperCase()}
+                            {managedProfile.subscriptionEndsAt
+                              ? ` · until ${new Date(managedProfile.subscriptionEndsAt).toLocaleDateString()}`
+                              : ''}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            Workspaces: {managedProfile.workspaceCount}
+                            {managedProfile.workspaceNames.length > 0 ? ` · ${managedProfile.workspaceNames.join(', ')}` : ''}
+                          </p>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600">
+                              {managedProfile.isAdmin ? 'Admin' : 'User'}
+                            </span>
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600">
+                              {managedProfile.isPro ? 'Pro' : 'Free'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={adminLoading}
+                            onClick={() => handleCopy(managedProfile.email, 'Email')}
+                          >
+                            Copy Email
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={adminLoading}
+                            onClick={() => handleCopy(managedProfile.id, 'User ID')}
+                          >
+                            Copy ID
+                          </Button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={monthsByProfile[managedProfile.id] ?? 1}
+                            onChange={(event) =>
+                              setMonthsByProfile((prev) => ({
+                                ...prev,
+                                [managedProfile.id]: Math.max(1, Number(event.target.value) || 1),
+                              }))
+                            }
+                            className="w-24 rounded-md border border-gray-300 px-3 py-2 text-sm"
+                            aria-label={`Months for ${managedProfile.email}`}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={adminLoading}
+                            onClick={() => handleAccessUpdate(managedProfile.id, managedProfile.isAdmin, !managedProfile.isPro)}
+                          >
+                            {managedProfile.isPro ? 'Remove Pro' : 'Grant Pro'}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={adminLoading || isCurrentUser}
+                            onClick={() => handleAccessUpdate(managedProfile.id, !managedProfile.isAdmin, managedProfile.isPro)}
+                          >
+                            {managedProfile.isAdmin ? 'Remove Admin' : 'Make Admin'}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Logout */}
         <Card className="border-red-200 bg-red-50 lg:col-span-2">

@@ -1,52 +1,138 @@
+import { LegalPage } from '@/components/legal-page'
+
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="container mx-auto max-w-4xl px-4 py-20 sm:py-24">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
-          <p className="text-sm uppercase tracking-[0.4em] text-slate-500">Legal</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-            Terms of Service
-          </h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600">
-            These terms describe the basic rules for using Monvia. By using the product, you agree to use it
-            responsibly, provide accurate information, and comply with applicable laws and regulations.
-          </p>
-
-          <div className="mt-12 space-y-10">
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">Using the Service</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                You are responsible for the activity that occurs in your account and for keeping your login credentials
-                secure. The service should be used only for lawful business or personal finance workflows.
+    <LegalPage
+      title="Terms of Service"
+      intro={
+        <p>
+          These terms provide an editable SaaS terms structure for Monvia. Replace the placeholders with your actual
+          business terms, support commitments, pricing rules, and legal review before production use.
+        </p>
+      }
+      sections={[
+        {
+          title: '1. Provider and Scope',
+          content: (
+            <>
+              <p>
+                These Terms of Service govern access to and use of Monvia, provided by [legal entity / provider name].
               </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">Your Content</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                You retain ownership of the data you enter into the product. You are responsible for ensuring that your
-                records, reports, and financial information are accurate and appropriately maintained.
+              <p>
+                Define here whether the service is intended for businesses, freelancers, consumers, or a combination of
+                these groups.
               </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">Availability and Changes</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                We may improve, update, or modify the service over time. We aim to keep Monvia reliable and useful, but
-                availability can be affected by maintenance, updates, or third-party infrastructure.
+            </>
+          ),
+        },
+        {
+          title: '2. Accounts and Access',
+          content: (
+            <>
+              <p>
+                Users are responsible for maintaining the confidentiality of account credentials and for all activity
+                under their account.
               </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-slate-900">Support</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                If you have questions about these terms or need help using the service, you can reach out through the
-                support channels already listed in the site footer.
+              <p>
+                Add your rules for eligibility, account registration, suspension, admin overrides, and acceptable use.
               </p>
-            </section>
-          </div>
-        </div>
-      </main>
-    </div>
+            </>
+          ),
+        },
+        {
+          title: '3. Service Description',
+          content: (
+            <>
+              <p>
+                Monvia is a SaaS application for bookkeeping-related workflows such as income tracking, expense
+                tracking, workspace management, and time tracking.
+              </p>
+              <p>
+                This description should stay factual and should not promise uninterrupted availability, regulatory
+                compliance, or guaranteed accounting outcomes unless you actually provide them.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '4. Fees, Plans, and Billing',
+          content: (
+            <>
+              <p>
+                Add your pricing model, trial rules, renewal terms, taxes/VAT handling, cancellation timing, and what
+                happens when a subscription expires or is manually overridden.
+              </p>
+              <p>
+                If billing is not yet live, state that access terms are currently managed manually or by invitation.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '5. Customer Data',
+          content: (
+            <>
+              <p>
+                Users retain responsibility for the accuracy, legality, and integrity of the data they enter into the
+                service.
+              </p>
+              <p>
+                Add your terms for data export, deletion, backup expectations, and any processing relationship between
+                provider and customer.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '6. Availability and Changes',
+          content: (
+            <>
+              <p>
+                The service may change over time. Features may be updated, improved, restricted, or discontinued where
+                reasonably necessary.
+              </p>
+              <p>
+                Planned maintenance, security updates, or third-party outages may affect service availability.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '7. Liability and Warranty',
+          content: (
+            <>
+              <p>
+                Add your jurisdiction-appropriate limitation of liability and warranty wording here, reviewed by legal
+                counsel. Do not promise results, tax outcomes, uninterrupted uptime, or legal/accounting correctness
+                unless contractually supported.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '8. Termination',
+          content: (
+            <>
+              <p>
+                Define how users can terminate the service, how the provider may suspend or terminate accounts, and how
+                long data remains available after termination.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: '9. Governing Law and Contact',
+          content: (
+            <>
+              <p>
+                Add the governing law, venue, mandatory consumer-law carve-outs if applicable, and a support/legal
+                contact address.
+              </p>
+              <p>Contact: [legal@your-domain.com]</p>
+            </>
+          ),
+        },
+      ]}
+    />
   )
 }
